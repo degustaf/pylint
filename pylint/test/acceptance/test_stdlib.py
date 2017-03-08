@@ -2,12 +2,18 @@
 # For details: https://github.com/PyCQA/pylint/blob/master/COPYING
 
 import os
+import sys
 import zipfile
 
 import pytest
 
 import pylint.lint
 
+
+try:
+    PYPY_VERSION_INFO = sys.pypy_version_info
+except AttributeError:
+    PYPY_VERSION_INFO = None
 
 def is_module(filename):
     return filename.endswith(".py")
@@ -26,6 +32,8 @@ MODULES_TO_CHECK = [(location, module) for location in LIB_DIRS for module in os
 MODULES_NAMES = [m[1] for m in MODULES_TO_CHECK]
 
 
+@pytest.mark.skipif(PYPY_VERSION_INFO,
+                    reason="This test takes too long to run on pypy.")
 @pytest.mark.parametrize(("test_module_location", "test_module_name"),
                          MODULES_TO_CHECK, ids=MODULES_NAMES)
 def test_libmodule(test_module_location, test_module_name):
